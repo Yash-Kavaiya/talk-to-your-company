@@ -1,0 +1,26 @@
+{
+  "provider": "kokoro (local)",
+  "voice": "af_heart",
+  "lines": {
+    "title": 7.55,
+    "problem": 12.98,
+    "solution": 7.95,
+    "twin": 7.26,
+    "plants": 8.48,
+    "ask": 7.8,
+    "goto": 5.16,
+    "safety": 4.19,
+    "honest": 3.44,
+    "camera": 3.76,
+    "alert": 4.03,
+    "who": 16.02,
+    "report": 7.11,
+    "share": 6.64,
+    "arch": 17.44,
+    "voice": 9.2,
+    "thor": 18.71,
+    "edge": 10.44,
+    "mocks": 8.13,
+    "close": 2.53
+  }
+}

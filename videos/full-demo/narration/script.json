@@ -1,0 +1,22 @@
+[
+  {"id": "title", "text": "This is Talk to your Company. A live 3D twin of your plants that you can talk to, built for a single NVIDIA Jetson Thor."},
+  {"id": "problem", "text": "A plant manager with several buildings and floors cannot watch every camera. Near misses, people in restricted zones and missing helmets go unseen. And a simple question means walking there, or calling someone."},
+  {"id": "solution", "text": "So we built a twin you can ask. Speak a question. The twin flies to the right floor, shows what the cameras see, and answers out loud."},
+  {"id": "twin", "text": "Two plants, six floors, six cameras. Every person and vehicle the cameras see becomes a live marker on the right floor."},
+  {"id": "plants", "text": "Select a plant and its floors spread apart. Conveyors, racks, machines and restricted zones all come from one configuration file."},
+  {"id": "ask", "text": "Ask in plain language, by voice or by text. Give me a status of both plants, and you get people, vehicles and open events."},
+  {"id": "goto", "text": "Say, show me plant two, floor three, and the camera flies there while the assistant answers."},
+  {"id": "safety", "text": "Ask about safety, and the events of the last ten minutes light up on the twin."},
+  {"id": "honest", "text": "And when a question is out of scope, it says so, instead of guessing."},
+  {"id": "camera", "text": "Focus a floor to see its live camera, with every detection boxed."},
+  {"id": "alert", "text": "Here, a worker has stepped into a restricted zone. The alert names them."},
+  {"id": "who", "text": "Ask, who is this person? You get the name, role and shift, when they entered, how long they stayed, and that they were not authorised. Follow-up questions work too. The people are fictional, and identity comes from a simulated badge feed, not from face recognition."},
+  {"id": "report", "text": "One more sentence writes the incident report. It is filled from the event record, so it cannot contain invented facts."},
+  {"id": "share", "text": "For a live demo, drop any recording, or your webcam, into a floor's camera, and it is analysed on the spot."},
+  {"id": "arch", "text": "Under the hood, there are two pipelines. First, perception. Video is decoded, a YOLO detector finds people and vehicles, a tracker follows them, and a homography maps pixels to floor metres. Rules turn those tracks into four kinds of safety event, stored on the device."},
+  {"id": "voice", "text": "Second, the voice path. Whisper transcribes the question, a vision language model chooses a tool, and Piper speaks the answer, sentence by sentence."},
+  {"id": "thor", "text": "All of it is built to run live on one NVIDIA Jetson Thor. The detector is exported to Tensor R T and batches all six streams. One vision language model handles both reasoning and vision, so everything fits inside fifteen gigabytes of memory. And one command starts it, fully offline."},
+  {"id": "edge", "text": "On screen, a heads-up display shows frames per second, voice latency, GPU and memory. And the promise that matters: no audio or video leaves the device."},
+  {"id": "mocks", "text": "Every heavy component also has a mock, so the same code runs on a laptop without a GPU. That is how this recording was made."},
+  {"id": "close", "text": "Talk to your Company. Ask your plant a question."}
+]
