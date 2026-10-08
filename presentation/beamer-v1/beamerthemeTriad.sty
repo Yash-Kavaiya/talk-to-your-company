@@ -1,0 +1,372 @@
+% ============================================================================
+%  beamerthemeTriad.sty  --  v1.0
+%  A three-zone Beamer theme: HEADLINE / BODY / FOOTLINE
+%
+%  Every content frame is divided into exactly three horizontal zones:
+%
+%    ZONE 1  HEADLINE  section context (left) + deck identity (right)
+%                      closed by a 0.7mm accent rule
+%    ZONE 2  BODY      frametitle + accent underline, then the content canvas
+%    ZONE 3  FOOTLINE  author | institute | frame counter, then progress strip
+%
+%  Frames marked [plain] drop zones 1 and 3 for full-bleed title, section
+%  and statement slides. That is intentional: the furniture is for navigation,
+%  and navigation slides do not need to navigate themselves.
+%
+%  Usage:   \usetheme[palette=indigo]{Triad}
+%
+%  Options:
+%    palette      = indigo | slate | crimson | forest | ocean | mono  (indigo)
+%    dark         = true | false   dark surface variant               (false)
+%    progressbar  = true | false   accent progress strip in footer    (true)
+%    sectionslide = true | false   auto divider slide per section     (true)
+%    counter      = frac | plain | none   frame counter style         (frac)
+% ============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeTriad}[2026/09/03 v1.0 Triad three-zone Beamer theme]
+
+\RequirePackage{kvoptions}
+\RequirePackage{etoolbox}
+\RequirePackage{tikz}
+\RequirePackage{xcolor}
+
+% ---------------------------------------------------------------- options ---
+\SetupKeyvalOptions{family=triad,prefix=triad@}
+\DeclareStringOption[indigo]{palette}
+\DeclareStringOption[frac]{counter}
+\DeclareBoolOption[false]{dark}
+\DeclareBoolOption[true]{progressbar}
+\DeclareBoolOption[true]{sectionslide}
+\ProcessKeyvalOptions*
+
+% ---------------------------------------------------------------- palettes --
+% Each palette fills seven semantic roles. To add a palette, keep the roles
+% and swap the hex values -- nothing downstream refers to a literal colour.
+%
+%   triadPrimary    structure: headline band, frametitles, block titles
+%   triadSecondary  support: example blocks, secondary emphasis
+%   triadAccent     one high-energy accent: rules, progress strip, alerts
+%   triadInk        body text
+%   triadPaper      slide surface
+%   triadMuted      de-emphasised text: footline, captions, subtitles
+%   triadWash       very light fill: block bodies, table banding
+
+\newcommand{\triad@definepalette}[7]{%
+  \definecolor{triadPrimary}{HTML}{#1}%
+  \definecolor{triadSecondary}{HTML}{#2}%
+  \definecolor{triadAccent}{HTML}{#3}%
+  \definecolor{triadInk}{HTML}{#4}%
+  \definecolor{triadPaper}{HTML}{#5}%
+  \definecolor{triadMuted}{HTML}{#6}%
+  \definecolor{triadWash}{HTML}{#7}%
+}
+
+\newbool{triad@paletteknown}
+\boolfalse{triad@paletteknown}
+
+\ifdefstring{\triad@palette}{indigo}{%
+  \triad@definepalette{1F2A6E}{3B4BA8}{F2A93B}{16181D}{FFFFFF}{6B7280}{EEF0FA}%
+  \booltrue{triad@paletteknown}}{}
+\ifdefstring{\triad@palette}{slate}{%
+  \triad@definepalette{22303C}{3E5060}{2ED3B7}{15202B}{FFFFFF}{6E7F8D}{EDF2F5}%
+  \booltrue{triad@paletteknown}}{}
+\ifdefstring{\triad@palette}{crimson}{%
+  \triad@definepalette{8C1D2C}{B3384A}{D98E04}{1B1B1B}{FFFFFF}{737373}{FBEDEE}%
+  \booltrue{triad@paletteknown}}{}
+\ifdefstring{\triad@palette}{forest}{%
+  \triad@definepalette{14532D}{2F7A4B}{C9A227}{14181A}{FFFFFF}{5F6B63}{EBF3ED}%
+  \booltrue{triad@paletteknown}}{}
+\ifdefstring{\triad@palette}{ocean}{%
+  \triad@definepalette{0B3C5D}{1D6E8C}{FF6B4A}{12181C}{FFFFFF}{667883}{E9F2F6}%
+  \booltrue{triad@paletteknown}}{}
+\ifdefstring{\triad@palette}{mono}{%
+  \triad@definepalette{1A1A1A}{4D4D4D}{0A84FF}{111111}{FFFFFF}{808080}{F2F2F2}%
+  \booltrue{triad@paletteknown}}{}
+
+% NVIDIA green + Globant lime on black. Colours approximate each brand's public look; no logos are used.
+\ifdefstring{\triad@palette}{nvglobant}{%
+  \triad@definepalette{76B900}{5C8F00}{BFD732}{F2F2F2}{0B0B0B}{A6A6A6}{1A1A1A}%
+  \booltrue{triad@paletteknown}}{}
+
+\notbool{triad@paletteknown}{%
+  \PackageWarning{beamerthemeTriad}{Unknown palette '\triad@palette'.
+    Falling back to 'indigo'. Valid: indigo, slate, crimson, forest, ocean, mono}%
+  \triad@definepalette{1F2A6E}{3B4BA8}{F2A93B}{16181D}{FFFFFF}{6B7280}{EEF0FA}}{}
+
+% Dark variant: remap the surface roles only. Primary and accent keep their
+% identity so a dark deck still reads as the same brand as its light twin.
+\iftriad@dark
+  \definecolor{triadPaper}{HTML}{12161C}
+  \definecolor{triadInk}{HTML}{ECEFF4}
+  \definecolor{triadMuted}{HTML}{93A1B0}
+  \definecolor{triadWash}{HTML}{1C222B}
+  \colorlet{triadPrimary}{triadPrimary!55!white}
+\fi
+
+% Full-bleed slides (title, section, statement): surface, type and detail colours.
+\colorlet{triadBleed}{triadPrimary}
+\colorlet{triadBleedInk}{white}
+\colorlet{triadBleedDetail}{triadAccent}
+\ifdefstring{\triad@palette}{nvglobant}{%
+  % always dark: undo the generic dark remap and keep the brand greens at full strength
+  \definecolor{triadPrimary}{HTML}{76B900}%
+  \definecolor{triadPaper}{HTML}{0B0B0B}%
+  \definecolor{triadInk}{HTML}{F2F2F2}%
+  \definecolor{triadMuted}{HTML}{A6A6A6}%
+  \definecolor{triadWash}{HTML}{1A1A1A}%
+  \definecolor{triadBleed}{HTML}{76B900}%
+  \definecolor{triadBleedInk}{HTML}{0B0B0B}%
+  \definecolor{triadBleedDetail}{HTML}{0B0B0B}}{}
+
+% ------------------------------------------------------------------ layout --
+\newlength{\triadmargin}\setlength{\triadmargin}{9mm}
+\newlength{\triadheadht}\setlength{\triadheadht}{3.0ex}
+\newlength{\triadruleht}\setlength{\triadruleht}{0.7mm}
+\newlength{\triad@barlen}
+
+\setbeamersize{text margin left=\triadmargin,text margin right=\triadmargin}
+
+% ------------------------------------------------------------------ colours -
+\setbeamercolor{normal text}{fg=triadInk,bg=triadPaper}
+\setbeamercolor{structure}{fg=triadPrimary}
+\setbeamercolor{alerted text}{fg=triadAccent}
+\setbeamercolor{example text}{fg=triadSecondary}
+
+\setbeamercolor{title}{fg=triadPrimary}
+\setbeamercolor{subtitle}{fg=triadMuted}
+\setbeamercolor{author}{fg=triadInk}
+\setbeamercolor{institute}{fg=triadMuted}
+\setbeamercolor{date}{fg=triadMuted}
+
+\setbeamercolor{frametitle}{fg=triadPrimary,bg=}
+\setbeamercolor{framesubtitle}{fg=triadMuted,bg=}
+
+\setbeamercolor{triad headline}{fg=white,bg=triadPrimary}
+\setbeamercolor{triad rule}{fg=triadAccent,bg=triadAccent}
+\setbeamercolor{triad footline}{fg=triadMuted,bg=triadWash}
+
+\setbeamercolor{block title}{fg=white,bg=triadPrimary}
+\setbeamercolor{block body}{fg=triadInk,bg=triadWash}
+\setbeamercolor{block title alerted}{fg=white,bg=triadAccent!85!black}
+\setbeamercolor{block body alerted}{fg=triadInk,bg=triadAccent!12!triadPaper}
+\setbeamercolor{block title example}{fg=white,bg=triadSecondary}
+\setbeamercolor{block body example}{fg=triadInk,bg=triadSecondary!12!triadPaper}
+
+\setbeamercolor{itemize item}{fg=triadAccent}
+\setbeamercolor{itemize subitem}{fg=triadSecondary}
+\setbeamercolor{itemize subsubitem}{fg=triadMuted}
+\setbeamercolor{enumerate item}{fg=triadPrimary}
+\setbeamercolor{section in toc}{fg=triadInk}
+\setbeamercolor{caption name}{fg=triadPrimary}
+
+\iftriad@dark
+  % On a dark surface a saturated headline band glares. Use the wash instead
+  % and let the accent rule carry the separation.
+  \setbeamercolor{triad headline}{fg=triadInk,bg=triadWash}
+  \setbeamercolor{triad footline}{fg=triadMuted,bg=triadWash}
+  \setbeamercolor{block title}{fg=triadPaper,bg=triadPrimary}
+\fi
+
+% -------------------------------------------------------------------- fonts -
+\setbeamerfont{title}{size=\LARGE,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large,series=\mdseries}
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\small,series=\mdseries}
+\setbeamerfont{triad headline}{size=\scriptsize}
+\setbeamerfont{triad footline}{size=\tiny}
+% Full-bleed slides carry one idea and are read from the back of the room,
+% so they get their own larger scale rather than reusing the title font.
+\setbeamerfont{triad display}{size=\Huge,series=\bfseries}
+\setbeamerfont{triad eyebrow}{size=\footnotesize,series=\bfseries}
+\setbeamerfont{block title}{size=\normalsize,series=\bfseries}
+\setbeamerfont{section in toc}{size=\large}
+
+% ---------------------------------------------------- markers and furniture -
+\setbeamertemplate{itemize item}{\raisebox{0.18ex}{\rule{0.75ex}{0.75ex}}}
+\setbeamertemplate{itemize subitem}{\raisebox{0.25ex}{\rule{0.6ex}{0.6ex}}}
+\setbeamertemplate{itemize subsubitem}{\textendash}
+\setbeamertemplate{enumerate item}{\insertenumlabel.}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{section in toc}{%
+  \leavevmode{\color{triadAccent}\rule[0.15ex]{1.5ex}{1.5ex}}\hskip1.2ex
+  \inserttocsectionnumber.~\inserttocsection\par}
+
+% ===========================================================================
+%  ZONE 1 -- HEADLINE
+% ===========================================================================
+\setbeamertemplate{headline}{%
+  \hbox{%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=\triadheadht,dp=1.3ex,%
+      leftskip=\triadmargin,rightskip=\triadmargin]{triad headline}%
+      \usebeamerfont{triad headline}%
+      \insertsectionhead\hfill\insertshorttitle%
+    \end{beamercolorbox}%
+  }%
+  \hbox{%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=\triadruleht,dp=0pt]{triad rule}%
+    \end{beamercolorbox}%
+  }%
+  \vskip0pt%
+}
+
+% ===========================================================================
+%  ZONE 2 -- BODY
+%  The frametitle anchors the top of the canvas. The short accent underline
+%  echoes the headline rule so the two zones read as one system.
+% ===========================================================================
+\setbeamertemplate{frametitle}{%
+  \vskip1.6ex%
+  \begin{beamercolorbox}[wd=\dimexpr\paperwidth-2\triadmargin\relax,%
+    leftskip=0pt,rightskip=0pt]{frametitle}%
+    \usebeamerfont{frametitle}\insertframetitle\par%
+    \ifx\insertframesubtitle\@empty\else
+      \vskip0.2ex%
+      {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}%
+       \insertframesubtitle\par}%
+    \fi
+    \vskip0.7ex%
+    {\color{triadAccent}\rule{2.6em}{1.4pt}}%
+  \end{beamercolorbox}%
+  \vskip0.4ex%
+}
+
+% ===========================================================================
+%  ZONE 3 -- FOOTLINE
+%  Three cells summing to exactly \paperwidth, then the progress strip.
+% ===========================================================================
+\newcommand{\triad@framecounter}{%
+  \ifdefstring{\triad@counter}{none}{}{%
+    \ifdefstring{\triad@counter}{plain}{%
+      \insertframenumber}{%
+      \insertframenumber\,/\,\inserttotalframenumber}}%
+}
+
+\newcommand{\triad@progressstrip}{%
+  \iftriad@progressbar
+    \ifnum\inserttotalframenumber>0\relax
+      \pgfmathsetmacro{\triad@frac}{\insertframenumber/\inserttotalframenumber}%
+      \setlength{\triad@barlen}{\triad@frac\paperwidth}%
+      \hbox{%
+        {\color{triadAccent}\rule{\triad@barlen}{1mm}}%
+        {\color{triadWash}\rule{\dimexpr\paperwidth-\triad@barlen\relax}{1mm}}%
+      }%
+    \fi
+  \fi
+}
+
+\setbeamertemplate{footline}{%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.36\paperwidth,ht=2.4ex,dp=1.1ex,left,%
+      leftskip=\triadmargin]{triad footline}%
+      \usebeamerfont{triad footline}\insertshortauthor%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=0.40\paperwidth,ht=2.4ex,dp=1.1ex,center]{triad footline}%
+      \usebeamerfont{triad footline}\insertshortinstitute%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=0.24\paperwidth,ht=2.4ex,dp=1.1ex,right,%
+      rightskip=\triadmargin]{triad footline}%
+      \usebeamerfont{triad footline}\triad@framecounter%
+    \end{beamercolorbox}%
+  }%
+  \triad@progressstrip
+}
+
+% ===========================================================================
+%  Title slide -- full bleed. Use \begin{frame}[plain].
+% ===========================================================================
+\setbeamertemplate{title page}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[triadBleed] (current page.north west)
+      rectangle ([yshift=-0.44\paperheight]current page.north east);
+    \fill[triadAccent] ([yshift=-0.44\paperheight]current page.north west)
+      rectangle ([yshift=-0.452\paperheight]current page.north east);
+  \end{tikzpicture}%
+  \vskip0.05\paperheight
+  \raggedright
+  {\usebeamerfont{title}\color{triadBleedInk}\inserttitle\par}
+  \ifx\insertsubtitle\@empty\else
+    \vskip1.0ex%
+    {\usebeamerfont{subtitle}\color{triadBleedInk}\insertsubtitle\par}%
+  \fi
+  \vskip0.21\paperheight
+  {\usebeamerfont{author}\usebeamercolor[fg]{author}\bfseries\insertauthor\par}
+  \vskip0.5ex
+  {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+  \vskip0.9ex
+  {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+}
+
+% ===========================================================================
+%  Section divider -- full bleed, numbered, same accent motif.
+% ===========================================================================
+\newcommand{\triadsectionpage}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[triadBleed] (current page.north west) rectangle (current page.south east);
+  \end{tikzpicture}%
+  % A fixed-height centred box rather than \vfill: this centres identically
+  % whether or not the deck uses the [t] class option.
+  \begin{minipage}[c][\textheight][c]{\textwidth}%
+    \raggedright
+    {\color{triadBleedDetail}\usebeamerfont{triad eyebrow}SECTION\ \thesection}\par
+    \vskip1.4ex
+    {\color{triadBleedInk}\usebeamerfont{triad display}\insertsection\par}
+    \vskip1.8ex
+    {\color{triadBleedDetail}\rule{4em}{2.2pt}}%
+  \end{minipage}%
+}
+
+\iftriad@sectionslide
+  \AtBeginSection[]{%
+    \begin{frame}[plain,noframenumbering]
+      \triadsectionpage
+    \end{frame}%
+  }
+\fi
+
+% ===========================================================================
+%  Authoring helpers -- body-zone patterns common enough to build in.
+% ===========================================================================
+
+% Full-bleed statement slide. #1 optional supporting line, #2 the message.
+\newcommand{\triadstatement}[2][]{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[triadBleed] (current page.north west) rectangle (current page.south east);
+  \end{tikzpicture}%
+  \begin{minipage}[c][\textheight][c]{\textwidth}%
+    \raggedright
+    {\color{triadBleedInk}\usebeamerfont{triad display}#2\par}
+    \ifblank{#1}{}{%
+      \vskip1.6ex{\color{triadBleedDetail}\rule{3em}{2.2pt}}\par
+      \vskip1.6ex{\color{triadBleedInk}\large #1\par}}%
+  \end{minipage}%
+}
+
+% A single metric tile. #1 optional colour, #2 the number, #3 the label.
+\newcommand{\triadmetric}[3][triadAccent]{%
+  \begin{minipage}[t]{0.30\textwidth}
+    {\color{#1}\fontsize{26}{28}\selectfont\bfseries #2\par}
+    \vskip0.5ex
+    {\color{triadMuted}\small #3\par}
+  \end{minipage}%
+}
+
+% Three metric tiles spread across the body zone.
+\newcommand{\triadmetricrow}[3]{\noindent#1\hfill#2\hfill#3\par}
+
+% The one line the audience should read first.
+\newcommand{\triadlead}[1]{{\color{triadPrimary}\bfseries #1\par}\vskip0.9ex}
+
+% Takeaway strip pinned to the bottom of the body zone.
+\newcommand{\triadtakeaway}[1]{%
+  \vfill
+  \begin{beamercolorbox}[wd=\textwidth,leftskip=1.2ex,rightskip=1.2ex,%
+    sep=1.2ex,rounded=true]{block body}%
+    {\color{triadAccent}\bfseries Takeaway\ \ }#1%
+  \end{beamercolorbox}%
+}
+
+\mode<all>
+\endinput

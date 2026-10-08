@@ -1,0 +1,130 @@
+# Site layout: the single source of truth for plants, floors, cameras and zones.
+# Floor coordinates are metres, origin at one corner, x along size_m[0], y along size_m[1].
+# objects are fixed equipment (conveyor, rack, machine, pallets, office); rect is [x, y, width, depth].
+# camera.video is an mp4 file (relative names are looked up in VIDEOS_DIR, default /cache/videos),
+# `browser` (nothing until a browser shares into it) or `webcam:0` (a camera on this machine).
+# Any camera can also be taken over from the browser with "Share webcam" or "Share recording".
+# homography maps image pixels (1280x720) to floor metres; fill it with scripts/calibrate.py.
+# The placeholder below just scales the whole image onto the whole floor.
+
+# Mock perception stages its restricted-zone scenario on this floor, so the demo story is repeatable.
+demo_restricted_floor: P1/F2
+
+plants:
+
+  - id: P1
+    name: Plant 1
+    floors:
+      - id: F1
+        size_m: [40, 25]
+        camera:
+          id: cam_p1f1
+          video: browser   # fed from the browser (webcam or a recording); or p1f1.mp4, or webcam:0
+          homography: [[0.03125, 0, 0], [0, 0.034722, 0], [0, 0, 1]]
+        zones:
+          - {id: z1, type: restricted, polygon: [[0, 0], [6, 0], [6, 6], [0, 6]]}
+          - {id: z2, type: dock, polygon: [[30, 0], [40, 0], [40, 8], [30, 8]]}
+        objects:
+          - {id: c1, type: conveyor, rect: [8, 11, 20, 1.6]}
+          - {id: r1, type: rack, rect: [8, 18, 14, 1.2]}
+          - {id: r2, type: rack, rect: [8, 21.5, 14, 1.2]}
+          - {id: p1, type: pallets, rect: [24, 2, 4, 3]}
+          - {id: m1, type: machine, rect: [0.6, 0.6, 2.2, 2.2]}
+          - {id: o1, type: office, rect: [32, 19, 7, 5]}
+      - id: F2
+        size_m: [40, 25]
+        camera:
+          id: cam_p1f2
+          video: p1f2.mp4
+          homography: [[0.03125, 0, 0], [0, 0.034722, 0], [0, 0, 1]]
+        zones:
+          - {id: z1, type: walkway, polygon: [[0, 11], [40, 11], [40, 14], [0, 14]]}
+          # placed where the worker in the sample clip for this camera stops (with the placeholder homography)
+          - {id: z2, type: restricted, polygon: [[7, 16.5], [17, 16.5], [17, 23.5], [7, 23.5]]}
+        objects:
+          - {id: m1, type: machine, rect: [4, 3, 4, 3]}
+          - {id: m2, type: machine, rect: [12, 3, 4, 3]}
+          - {id: m3, type: machine, rect: [20, 3, 4, 3]}
+          - {id: m4, type: machine, rect: [28, 3, 4, 3]}
+          - {id: c1, type: conveyor, rect: [4, 8, 28, 1.4]}
+          - {id: m5, type: machine, rect: [7.6, 17, 2.2, 1.8]}
+          - {id: r1, type: rack, rect: [22, 17, 14, 1.2]}
+          - {id: r2, type: rack, rect: [22, 21, 14, 1.2]}
+          - {id: p1, type: pallets, rect: [1, 17, 4, 5]}
+      - id: F3
+        size_m: [40, 25]
+        camera:
+          id: cam_p1f3
+          video: p1f3.mp4
+          homography: [[0.03125, 0, 0], [0, 0.034722, 0], [0, 0, 1]]
+        zones:
+          - {id: z1, type: restricted, polygon: [[17, 0], [23, 0], [23, 5], [17, 5]]}
+        objects:
+          - {id: r1, type: rack, rect: [4, 9, 14, 1.2]}
+          - {id: r2, type: rack, rect: [4, 13, 14, 1.2]}
+          - {id: r3, type: rack, rect: [4, 17, 14, 1.2]}
+          - {id: r4, type: rack, rect: [22, 9, 14, 1.2]}
+          - {id: r5, type: rack, rect: [22, 13, 14, 1.2]}
+          - {id: r6, type: rack, rect: [22, 17, 14, 1.2]}
+          - {id: m1, type: machine, rect: [17.5, 0.4, 1.8, 1.6]}
+          - {id: p1, type: pallets, rect: [28, 2, 5, 3]}
+          - {id: o1, type: office, rect: [2, 1, 8, 5]}
+
+  - id: P2
+    name: Plant 2
+    floors:
+      - id: F1
+        size_m: [50, 30]
+        camera:
+          id: cam_p2f1
+          video: p2f1.mp4
+          homography: [[0.039063, 0, 0], [0, 0.041667, 0], [0, 0, 1]]
+        zones:
+          - {id: z1, type: dock, polygon: [[0, 0], [12, 0], [12, 8], [0, 8]]}
+          - {id: z2, type: restricted, polygon: [[42, 22], [50, 22], [50, 30], [42, 30]]}
+        objects:
+          - {id: c1, type: conveyor, rect: [14, 3, 26, 1.6]}
+          - {id: c2, type: conveyor, rect: [14, 14, 30, 1.6]}
+          - {id: p1, type: pallets, rect: [14, 7, 5, 4]}
+          - {id: p2, type: pallets, rect: [22, 7, 5, 4]}
+          - {id: r1, type: rack, rect: [6, 20, 16, 1.2]}
+          - {id: r2, type: rack, rect: [6, 24, 16, 1.2]}
+          - {id: m1, type: machine, rect: [47, 27, 2.5, 2.5]}
+          - {id: o1, type: office, rect: [28, 21, 9, 6]}
+      - id: F2
+        size_m: [50, 30]
+        camera:
+          id: cam_p2f2
+          video: p2f2.mp4
+          homography: [[0.039063, 0, 0], [0, 0.041667, 0], [0, 0, 1]]
+        zones:
+          - {id: z1, type: walkway, polygon: [[0, 13], [50, 13], [50, 17], [0, 17]]}
+          - {id: z2, type: restricted, polygon: [[0, 22], [8, 22], [8, 30], [0, 30]]}
+        objects:
+          - {id: m1, type: machine, rect: [6, 3, 5, 3.5]}
+          - {id: m2, type: machine, rect: [15, 3, 5, 3.5]}
+          - {id: m3, type: machine, rect: [24, 3, 5, 3.5]}
+          - {id: m4, type: machine, rect: [33, 3, 5, 3.5]}
+          - {id: m5, type: machine, rect: [42, 3, 5, 3.5]}
+          - {id: c1, type: conveyor, rect: [6, 9, 41, 1.4]}
+          - {id: m6, type: machine, rect: [0.6, 27, 2.6, 2.4]}
+          - {id: r1, type: rack, rect: [14, 21, 16, 1.2]}
+          - {id: r2, type: rack, rect: [14, 25, 16, 1.2]}
+          - {id: p1, type: pallets, rect: [36, 21, 6, 5]}
+      - id: F3
+        size_m: [50, 30]
+        camera:
+          id: cam_p2f3
+          video: p2f3.mp4
+          homography: [[0.039063, 0, 0], [0, 0.041667, 0], [0, 0, 1]]
+        zones:
+          - {id: z1, type: restricted, polygon: [[21, 12], [29, 12], [29, 18], [21, 18]]}
+        objects:
+          - {id: m1, type: machine, rect: [21.5, 12.5, 2.5, 2.5]}
+          - {id: r1, type: rack, rect: [4, 4, 16, 1.2]}
+          - {id: r2, type: rack, rect: [4, 8, 16, 1.2]}
+          - {id: r3, type: rack, rect: [30, 4, 16, 1.2]}
+          - {id: r4, type: rack, rect: [30, 8, 16, 1.2]}
+          - {id: c1, type: conveyor, rect: [4, 23, 30, 1.6]}
+          - {id: p1, type: pallets, rect: [38, 21, 6, 5]}
+          - {id: o1, type: office, rect: [2, 13, 8, 6]}

@@ -1,0 +1,25 @@
+__pycache__/
+.pytest_cache/
+data/
+*.pyc
+.playwright-mcp/
+videos/*/capture/raw/
+videos/*/renders/
+videos/*/snapshots/
+videos/*/.hyperframes/
+videos/*/node_modules/
+presentation/pptx/node_modules/
+presentation/beamer/*.aux
+presentation/beamer/*.log
+presentation/beamer/preview/
+
+# Local environments and credentials
+.venv/
+venv/
+node_modules/
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key

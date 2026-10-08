@@ -1,0 +1,6 @@
+# Jetson only (real backends). Install ONE AT A TIME with scripts/safe_install.sh, which refuses
+# any package whose dry run would install torch, torchvision or numpy (see CLAUDE.md).
+transformers
+pillow
+ultralytics
+piper-tts

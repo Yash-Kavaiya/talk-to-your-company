@@ -1,0 +1,8 @@
+# Laptop (mock mode) and Jetson. None of these depend on torch, torchvision or numpy.
+fastapi
+uvicorn[standard]
+pydantic>=2
+pyyaml
+# tests
+pytest
+httpx

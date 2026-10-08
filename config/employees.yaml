@@ -1,0 +1,47 @@
+# SYNTHETIC employee directory for the demo. Every person here is fictional.
+# `home` is the floor the person normally works on; the simulated badge feed assigns people on a
+# floor's camera to that floor's employees. `authorised_zones` lists restricted zones the person may
+# enter, written plant/floor/zone. Nobody is identified from their face or appearance.
+
+employees:
+  # Plant 1, floor F1 (receiving)
+  - {id: E1001, name: Meera Iyer, role: Receiving clerk, department: Logistics, shift: Day, supervisor: Daniel Okafor, home: P1/F1, certifications: [Safety induction, Manual handling]}
+  - {id: E1002, name: Tomas Novak, role: Forklift operator, department: Logistics, shift: Day, supervisor: Daniel Okafor, home: P1/F1, certifications: [Safety induction, Forklift licence]}
+  - {id: E1003, name: Aisha Rahman, role: Inventory controller, department: Logistics, shift: Day, supervisor: Daniel Okafor, home: P1/F1, certifications: [Safety induction]}
+  - {id: E1004, name: Lucas Ferreira, role: Dock loader, department: Logistics, shift: Day, supervisor: Daniel Okafor, home: P1/F1, certifications: [Safety induction, Manual handling]}
+  - {id: E1005, name: Hannah Schmidt, role: Maintenance technician, department: Maintenance, shift: Day, supervisor: Grace Lindqvist, home: P1/F1, authorised_zones: [P1/F1/z1], certifications: [Safety induction, Lockout-tagout, Electrical safety]}
+
+  # Plant 1, floor F2 (machine line)
+  - {id: E1006, name: Arjun Mehta, role: Line operator, department: Assembly, shift: Day, supervisor: Sofia Marchetti, home: P1/F2, certifications: [Safety induction, Machine guarding]}
+  - {id: E1007, name: Chloe Dubois, role: Quality inspector, department: Quality, shift: Day, supervisor: Sofia Marchetti, home: P1/F2, certifications: [Safety induction]}
+  - {id: E1008, name: Kwame Mensah, role: Line operator, department: Assembly, shift: Day, supervisor: Sofia Marchetti, home: P1/F2, certifications: [Safety induction, Machine guarding]}
+  - {id: E1009, name: Yuki Tanaka, role: Process engineer, department: Engineering, shift: Day, supervisor: Sofia Marchetti, home: P1/F2, certifications: [Safety induction]}
+  - {id: E1010, name: Mateo Alvarez, role: Maintenance technician, department: Maintenance, shift: Day, supervisor: Grace Lindqvist, home: P1/F2, authorised_zones: [P1/F2/z2], certifications: [Safety induction, Lockout-tagout, Electrical safety]}
+
+  # Plant 1, floor F3 (storage)
+  - {id: E1011, name: Fatima Zahra, role: Stock picker, department: Warehouse, shift: Day, supervisor: Peter Hall, home: P1/F3, certifications: [Safety induction, Working at height]}
+  - {id: E1012, name: Oliver Bennett, role: Stock picker, department: Warehouse, shift: Day, supervisor: Peter Hall, home: P1/F3, certifications: [Safety induction]}
+  - {id: E1013, name: Ngozi Adeyemi, role: Forklift operator, department: Warehouse, shift: Day, supervisor: Peter Hall, home: P1/F3, certifications: [Safety induction, Forklift licence]}
+  - {id: E1014, name: Ivan Petrov, role: Inventory controller, department: Warehouse, shift: Day, supervisor: Peter Hall, home: P1/F3, certifications: [Safety induction]}
+  - {id: E1015, name: Sara Lindgren, role: Maintenance technician, department: Maintenance, shift: Day, supervisor: Grace Lindqvist, home: P1/F3, authorised_zones: [P1/F3/z1], certifications: [Safety induction, Lockout-tagout]}
+
+  # Plant 2, floor F1 (shipping)
+  - {id: E2001, name: Diego Castillo, role: Shipping clerk, department: Logistics, shift: Day, supervisor: Amara Nwosu, home: P2/F1, certifications: [Safety induction]}
+  - {id: E2002, name: Emily Carter, role: Packer, department: Logistics, shift: Day, supervisor: Amara Nwosu, home: P2/F1, certifications: [Safety induction, Manual handling]}
+  - {id: E2003, name: Rahul Nair, role: Forklift operator, department: Logistics, shift: Day, supervisor: Amara Nwosu, home: P2/F1, certifications: [Safety induction, Forklift licence]}
+  - {id: E2004, name: Linh Tran, role: Packer, department: Logistics, shift: Day, supervisor: Amara Nwosu, home: P2/F1, certifications: [Safety induction]}
+  - {id: E2005, name: Jonas Weber, role: Maintenance technician, department: Maintenance, shift: Day, supervisor: Grace Lindqvist, home: P2/F1, authorised_zones: [P2/F1/z2], certifications: [Safety induction, Lockout-tagout]}
+
+  # Plant 2, floor F2 (machine line)
+  - {id: E2006, name: Zanele Dlamini, role: Line operator, department: Assembly, shift: Day, supervisor: Marco Rossi, home: P2/F2, certifications: [Safety induction, Machine guarding]}
+  - {id: E2007, name: Pavel Horak, role: Line operator, department: Assembly, shift: Day, supervisor: Marco Rossi, home: P2/F2, certifications: [Safety induction, Machine guarding]}
+  - {id: E2008, name: Nadia Haddad, role: Quality inspector, department: Quality, shift: Day, supervisor: Marco Rossi, home: P2/F2, certifications: [Safety induction]}
+  - {id: E2009, name: Samuel Osei, role: Process engineer, department: Engineering, shift: Day, supervisor: Marco Rossi, home: P2/F2, certifications: [Safety induction]}
+  - {id: E2010, name: Ingrid Solberg, role: Maintenance technician, department: Maintenance, shift: Day, supervisor: Grace Lindqvist, home: P2/F2, authorised_zones: [P2/F2/z2], certifications: [Safety induction, Lockout-tagout, Electrical safety]}
+
+  # Plant 2, floor F3 (storage)
+  - {id: E2011, name: Carlos Rivera, role: Stock picker, department: Warehouse, shift: Day, supervisor: Helen Park, home: P2/F3, certifications: [Safety induction]}
+  - {id: E2012, name: Anika Bose, role: Stock picker, department: Warehouse, shift: Day, supervisor: Helen Park, home: P2/F3, certifications: [Safety induction, Working at height]}
+  - {id: E2013, name: Thabo Nkosi, role: Forklift operator, department: Warehouse, shift: Day, supervisor: Helen Park, home: P2/F3, certifications: [Safety induction, Forklift licence]}
+  - {id: E2014, name: Elena Popescu, role: Inventory controller, department: Warehouse, shift: Day, supervisor: Helen Park, home: P2/F3, certifications: [Safety induction]}
+  - {id: E2015, name: Rashid Karimi, role: Maintenance technician, department: Maintenance, shift: Day, supervisor: Grace Lindqvist, home: P2/F3, authorised_zones: [P2/F3/z1], certifications: [Safety induction, Lockout-tagout]}

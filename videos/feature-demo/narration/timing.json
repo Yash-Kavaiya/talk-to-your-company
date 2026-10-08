@@ -1,0 +1,17 @@
+{
+  "provider": "deepgram",
+  "voice": "aura-2-thalia-en",
+  "lines": {
+    "title": 4.32,
+    "twin": 7.96,
+    "plants": 9.52,
+    "ask": 8.76,
+    "safety": 5.04,
+    "camera": 4.92,
+    "alert": 4.72,
+    "who": 17.64,
+    "report": 6.36,
+    "share": 7.2,
+    "edge": 11.88
+  }
+}

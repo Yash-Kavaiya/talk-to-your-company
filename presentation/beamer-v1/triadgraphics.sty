@@ -1,0 +1,241 @@
+% ============================================================================
+%  triadgraphics.sty  --  v1.0
+%  Chart, plot and diagram styles for the Triad Beamer theme.
+%
+%  Load AFTER \usetheme{Triad}. Every style here refers to the palette roles
+%  (triadPrimary, triadAccent, ...) rather than literal colours, so charts
+%  restyle themselves automatically when the deck's palette changes.
+%
+%      \usetheme[palette=slate]{Triad}
+%      \usepackage{triadgraphics}
+%
+%  Design intent: charts on a slide are read in about four seconds from six
+%  metres away. Everything here removes ink that does not carry data --
+%  no chart junk, no top/right spines, no heavy gridlines, no boxed legends.
+% ============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{triadgraphics}[2026/09/03 v1.0 Triad chart and diagram styles]
+
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\RequirePackage{etoolbox}
+
+\usetikzlibrary{
+  arrows.meta, positioning, calc, fit, backgrounds, shapes.geometric,
+  decorations.pathreplacing, matrix, chains, shadows.blur, patterns
+}
+
+% pgfplots changes defaults between compat levels. Pin it, but fall back
+% gracefully if the installed pgfplots predates 1.18.
+\pgfplotsset{compat=1.18}
+
+% The palette must already exist. Failing here with a clear message beats
+% failing later with "Undefined color triadPrimary" inside a plot.
+% \@ifundefinedcolor is xcolor's own test; the internal macro name it uses
+% for a defined colour is not predictable, so do not probe \color@<name>.
+\@ifundefinedcolor{triadPrimary}{%
+  \PackageError{triadgraphics}
+    {Triad palette not found}
+    {Load this package AFTER \string\usetheme{Triad}.}%
+}{}
+
+% ============================================================================
+%  CHART SIZING
+%  The body zone is finite. These two lengths keep every chart inside it,
+%  clear of the footline band. Override them per-slide if a chart needs less.
+% ============================================================================
+\newlength{\triadchartwidth}
+\newlength{\triadchartheight}
+\setlength{\triadchartwidth}{0.86\textwidth}
+\setlength{\triadchartheight}{0.52\textheight}
+
+% ============================================================================
+%  PGFPLOTS BASE STYLE
+% ============================================================================
+\pgfplotsset{
+  % The base every Triad chart starts from.
+  triad axis/.style={
+    width=\triadchartwidth,
+    height=\triadchartheight,
+    axis lines=left,
+    axis line style={draw=triadMuted!55, line width=0.5pt},
+    tick align=outside,
+    tick style={draw=triadMuted!55, line width=0.5pt},
+    every tick label/.append style={font=\scriptsize, color=triadMuted},
+    label style={font=\small, color=triadInk},
+    title style={font=\small\bfseries, color=triadPrimary, yshift=2pt},
+    grid=major,
+    major grid style={draw=triadMuted!20, line width=0.4pt},
+    % Legend sits above the plot, not below it. Below the axis it collides
+    % with the x-axis label, which is a silent overlap the compiler will not
+    % report. Above the axis there is always clear space on a slide.
+    legend style={
+      draw=none, fill=none, font=\scriptsize, text=triadInk,
+      cells={anchor=west}, at={(0.5,1.04)}, anchor=south, legend columns=-1,
+      /tikz/every even column/.append style={column sep=8pt},
+    },
+    legend cell align=left,
+    clip=false,
+  },
+  % Vertical bars. Categorical x axis, no vertical gridlines.
+  triad bars/.style={
+    triad axis,
+    ybar,
+    bar width=14pt,
+    % Bars encode value by length, so a non-zero baseline exaggerates
+    % differences. pgfplots auto-scales to the data range by default, which
+    % silently produces a misleading chart -- pin the baseline to zero.
+    ymin=0,
+    ymajorgrids=true, xmajorgrids=false,
+    enlarge x limits=0.18,
+    nodes near coords,
+    every node near coord/.append style={
+      font=\scriptsize\bfseries, color=triadInk, anchor=south, yshift=1pt},
+  },
+  % Horizontal bars. Correct choice when category labels are long.
+  triad hbars/.style={
+    triad axis,
+    xbar,
+    bar width=12pt,
+    xmin=0,
+    xmajorgrids=true, ymajorgrids=false,
+    enlarge y limits=0.20,
+    nodes near coords,
+    every node near coord/.append style={
+      font=\scriptsize\bfseries, color=triadInk, anchor=west, xshift=2pt},
+  },
+  % Lines and trends over a continuous axis.
+  triad lines/.style={
+    triad axis,
+    cycle list name=triadcycle,
+  },
+  % Scatter / correlation.
+  triad scatter/.style={
+    triad axis,
+    only marks,
+    mark size=2pt,
+  },
+  % Stacked composition. Bars touch, so drop the separating gridlines.
+  triad stack/.style={
+    triad axis,
+    ybar stacked,
+    bar width=18pt,
+    ymin=0,
+    ymajorgrids=true, xmajorgrids=false,
+    enlarge x limits=0.25,
+  },
+}
+
+% Series colour order. Primary first because the first series is usually the
+% subject; accent second so the comparison stands out against it.
+\pgfplotscreateplotcyclelist{triadcycle}{%
+  {triadPrimary, mark=*,        mark size=1.7pt, line width=1.3pt,
+     mark options={fill=triadPrimary, draw=triadPrimary}},
+  {triadAccent,  mark=square*,  mark size=1.7pt, line width=1.3pt,
+     mark options={fill=triadAccent, draw=triadAccent}},
+  {triadSecondary, mark=triangle*, mark size=2.1pt, line width=1.3pt,
+     mark options={fill=triadSecondary, draw=triadSecondary}},
+  {triadMuted, mark=diamond*, mark size=1.9pt, line width=1.1pt,
+     dashed, mark options={solid, fill=triadMuted, draw=triadMuted}},
+}
+
+% Fills for bar and area charts, in the same priority order.
+\pgfplotsset{
+  triad fill a/.style={fill=triadPrimary, draw=none},
+  triad fill b/.style={fill=triadAccent, draw=none},
+  triad fill c/.style={fill=triadSecondary, draw=none},
+  triad fill d/.style={fill=triadMuted!45, draw=none},
+  % Use to grey out every bar except the one being argued about.
+  triad fill dim/.style={fill=triadMuted!30, draw=none},
+  triad area/.style={fill=triadPrimary!18, draw=triadPrimary, line width=1.2pt},
+}
+
+% ============================================================================
+%  TIKZ DIAGRAM STYLES
+%  Nodes, arrows and containers for flows, architectures and timelines.
+% ============================================================================
+\tikzset{
+  % --- nodes ---
+  tnode/.style={
+    rectangle, rounded corners=2pt, draw=none,
+    fill=triadPrimary, text=white,
+    font=\small\bfseries, align=center,
+    minimum height=9mm, minimum width=24mm, inner sep=2mm,
+  },
+  tnode alt/.style   ={tnode, fill=triadSecondary},
+  tnode accent/.style={tnode, fill=triadAccent, text=triadInk},
+  tnode soft/.style  ={tnode, fill=triadWash, text=triadInk,
+                       draw=triadMuted!45, line width=0.5pt},
+  tnode ghost/.style ={tnode, fill=none, text=triadMuted,
+                       draw=triadMuted!45, line width=0.5pt, dashed},
+  % Size variants. The body zone is 142mm x 77mm at 16:9, and the frametitle
+  % eats roughly 18mm of the height, leaving about 142mm x 59mm for a diagram.
+  % Five default-width nodes in a row overflow that budget; use tnode sm.
+  tnode sm/.style    ={tnode, minimum width=18mm, minimum height=8mm,
+                       font=\scriptsize\bfseries},
+  tnode wide/.style  ={tnode, minimum width=34mm},
+  % Decision diamond for branching flows.
+  tdecide/.style={
+    diamond, aspect=1.9, draw=none, fill=triadAccent, text=triadInk,
+    font=\scriptsize\bfseries, align=center, inner sep=1mm,
+    minimum height=9mm,
+  },
+  % Small circular step marker for numbered sequences.
+  tstep/.style={
+    circle, fill=triadAccent, text=triadInk,
+    font=\scriptsize\bfseries, inner sep=0pt, minimum size=5.5mm,
+  },
+  % --- arrows ---
+  tarrow/.style={
+    -{Stealth[length=2.4mm, width=1.8mm]},
+    draw=triadMuted, line width=0.9pt,
+  },
+  tarrow accent/.style={tarrow, draw=triadAccent, line width=1.2pt},
+  tarrow strong/.style={tarrow, draw=triadPrimary, line width=1.2pt},
+  tarrow soft/.style  ={tarrow, draw=triadMuted!55, dashed, line width=0.7pt},
+  tarrow both/.style  ={
+    {Stealth[length=2.4mm, width=1.8mm]}-{Stealth[length=2.4mm, width=1.8mm]},
+    draw=triadMuted, line width=0.9pt,
+  },
+  % --- labels and containers ---
+  tlabel/.style={font=\scriptsize, text=triadMuted, inner sep=2pt},
+  tedgelabel/.style={tlabel, midway, above, sloped=false},
+  % Grouping container, drawn behind its contents via the backgrounds layer.
+  tgroup/.style={
+    rectangle, rounded corners=3pt,
+    draw=triadMuted!40, line width=0.6pt,
+    fill=triadWash, inner sep=4mm,
+  },
+  tgrouplabel/.style={
+    font=\scriptsize\bfseries, text=triadMuted, anchor=north west,
+  },
+  % Horizontal band for swimlanes.
+  tlane/.style={
+    rectangle, draw=none, fill=triadWash, minimum height=16mm,
+  },
+}
+
+% ============================================================================
+%  HELPERS
+% ============================================================================
+
+% Centre a chart or diagram in the body zone with consistent spacing above.
+\newenvironment{triadfigure}[1][0.8em]
+  {\par\vskip#1\begin{center}}
+  {\end{center}\par}
+
+% A one-line caption under a chart, in the muted role. Charts on slides rarely
+% need a numbered \caption -- they need a sentence saying what to notice.
+\newcommand{\triadnote}[1]{%
+  \par\vskip0.4em
+  {\centering\footnotesize\color{triadMuted}#1\par}%
+}
+
+% Callout label pinned to a point on a chart. Use sparingly -- one per chart.
+% #1 tikz coordinate, #2 anchor direction, #3 text
+\newcommand{\triadcallout}[3]{%
+  \node[tlabel, text=triadAccent, font=\scriptsize\bfseries, #2] at #1 {#3};%
+}
+
+\endinput

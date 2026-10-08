@@ -1,0 +1,13 @@
+[
+  {"id": "title", "text": "This is Talk to your Company. A live 3D twin of your plants, that you can talk to."},
+  {"id": "twin", "text": "Two plants, six floors, six cameras. Every person and vehicle the cameras see becomes a live marker on the right floor."},
+  {"id": "plants", "text": "Select a plant and its floors spread apart. Conveyors, racks, machines and restricted zones all come from one configuration file."},
+  {"id": "ask", "text": "Ask in plain language, by voice or by text. Give me a status of both plants, and you get people, vehicles and open events."},
+  {"id": "safety", "text": "Ask about safety, and the events of the last ten minutes light up on the twin."},
+  {"id": "camera", "text": "Focus a floor to see its live camera, with every detection boxed."},
+  {"id": "alert", "text": "Here, a worker has stepped into a restricted zone. The alert names them."},
+  {"id": "who", "text": "Ask, who is this person? You get the name, role and shift, when they entered, how long they stayed, and that they were not authorised. The people are fictional, and identity comes from a simulated badge feed, not from face recognition."},
+  {"id": "report", "text": "One more sentence writes the incident report, with the person, the place and the recommended action."},
+  {"id": "share", "text": "For a live demo, drop any recording, or your webcam, into a floor's camera, and it is analysed on the spot."},
+  {"id": "edge", "text": "Detection, speech and the assistant are built to run on a single NVIDIA Jetson Thor, so no audio or video leaves the device. This recording was made on a laptop, running the same code."}
+]

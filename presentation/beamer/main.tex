@@ -1,0 +1,351 @@
+% Talk-to-your-Company: presentation deck (Beamer, Triad theme v2).
+% Build:  latexmk -pdf main.tex   (two passes; the counter and progress line need the .aux)
+\documentclass[aspectratio=169,11pt,t]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\IfFileExists{lmodern.sty}
+  {\usepackage{lmodern}\usepackage{microtype}}
+  {\usepackage{anyfontsize}\usepackage[expansion=false]{microtype}}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{fontawesome5}
+
+\usetheme[dark=true]{Triad}
+\usepackage{triadgraphics}
+
+% Brand: NVIDIA green and Globant lime on black. Colours only, no logos.
+\triadpalette{76B900}{5C8F00}{BFD732}{F5F5F5}{0A0A0A}{A8A8A8}{1B1B1B}
+\triadbleed{76B900}{0A0A0A}{0A0A0A}
+\triadon{0A0A0A}{FFFFFF}{0A0A0A}
+\graphicspath{{../assets/}}
+
+\title[Talk-to-your-Company]{Talk to your\\\triadhl{Company}}
+\subtitle{A live 3D twin of your plants that you can talk to.}
+\author[Yash Kavaiya]{Yash Kavaiya}
+\institute[Globant Physical AI Hackathon]{Globant Physical AI Hackathon}
+\date{October 2026}
+
+% Icon with a fixed width, for check and pending lists.
+\newcommand{\tick}[1]{\par\noindent\makebox[5.5mm][l]{\color{triadPrimary}\small\faIcon{check-circle}}#1\par\vskip0.9ex}
+\newcommand{\todo}[1]{\par\noindent\makebox[5.5mm][l]{\color{triadAccent}\small\faIcon{hourglass-half}}#1\par\vskip0.9ex}
+
+% One component with its real backend and its mock.
+\newcommand{\swap}[4]{%
+  \begin{minipage}[t]{0.235\textwidth}
+    \begin{triadcard}[equal height group=swap]
+      \triadbadge{#1}\par\vskip1.4ex
+      {\bfseries #2\par}\vskip0.9ex
+      {\scriptsize\bfseries\color{triadPrimary}REAL\par}{\small #3\par}\vskip0.7ex
+      {\scriptsize\bfseries\color{triadAccent}MOCK\par}{\small\color{triadMuted}#4\par}
+    \end{triadcard}
+  \end{minipage}}
+
+\begin{document}
+
+% ---------------------------------------------------------------- cover ----
+\begin{frame}[plain,noframenumbering]
+  \triadcover[\triadchip*{NVIDIA JETSON THOR}\hskip2mm\triadchip{GLOBANT PHYSICAL AI HACKATHON}]{cover.jpg}
+\end{frame}
+
+% ============================================================================
+\section{The problem}
+
+\begin{frame}{Nobody can watch every camera}
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=problem]{\faIcon{eye-slash}}{Events go unseen}{Near-misses, restricted zones and missing helmets slip by.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=problem]{\faIcon{walking}}{Answers are slow}{``What is happening on floor 3?'' means walking there.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=problem]{\faIcon{video}}{Walls are mute}{Camera walls show video. They cannot be asked anything.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=problem]{\faIcon{cloud}}{Cloud is a poor fit}{Factory video off site is slow, costly and often not allowed.}
+  \end{minipage}
+  \vskip2.6ex
+  {\large\bfseries The manager needs \triadhl{one view of the whole site}, and \triadhl{a way to ask it things}.\par}
+\end{frame}
+
+\begin{frame}[plain,noframenumbering]
+  \triadstatement[Ask by voice. The twin flies to the right floor, shows what the cameras see, and answers out loud.]
+    {A live 3D twin of your company that you can talk to.}
+\end{frame}
+
+% ============================================================================
+\section{What it does}
+
+\begin{frame}[plain]
+  \triadhero[\triadchip*{2 PLANTS}\hskip1.6mm\triadchip*{6 FLOORS}\hskip1.6mm\triadchip*{6 CAMERAS}]{hero.jpg}
+    {The whole company, live in one view.}
+    {Every person and vehicle the cameras see is a live marker on the right floor.}
+\end{frame}
+
+\begin{frame}{The whole site comes from one configuration file}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.40\textwidth}
+      \vskip1mm
+      \triaditem{\faIcon{layer-group}}{Floors spread apart}{Select a plant to look down on any floor.}
+      \triaditem{\faIcon{file-code}}{Layout is data, not code}{Plants, floors, cameras, zones, equipment.}
+      \triaditem{\faIcon{sync-alt}}{Change the file, all follows}{The twin, the rules and the assistant.}
+    \end{column}
+    \begin{column}{0.56\textwidth}
+      \triadshot{plants_tall.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{You ask in plain language, by voice or by text}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.40\textwidth}
+      \triadquote[YOU ASK]{Give me a status of both plants.}
+      \triadquote[YOU ASK]{Show me Plant 2, floor 3.}
+      \triadquote[YOU ASK]{Any safety issues in the last ten minutes?}
+    \end{column}
+    \begin{column}{0.56\textwidth}
+      \triadshot{ask.jpg}
+      \vskip1.6ex
+      {\small\color{triadMuted}Answers are spoken, shown as text, and move the twin.\par}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Four rules turn movement into safety events}
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=rules]{\faIcon{exclamation-triangle}}{Near miss}{Person within 2 m of a closing forklift.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=rules]{\faIcon{ban}}{Restricted zone}{Person inside for more than 2 seconds.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=rules]{\faIcon{hard-hat}}{No helmet}{The vision check on a person says no.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \triadcardbox[equal height group=rules]{\faIcon{users}}{Crowding}{More than 4 people within 3 m.}
+  \end{minipage}
+  \vskip3.0ex
+  {\large\bfseries Events land on the \triadhl{right floor}, are stored, and can be asked about by plant, floor, type and time.\par}
+\end{frame}
+
+\begin{frame}{Every floor has a live camera, with detections boxed}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.56\textwidth}
+      \triadshot{camera.jpg}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      \vskip1mm
+      \triaditem{\faIcon{camera}}{Focus a floor, see its camera}{The view opens beside the twin.}
+      \triaditem{\faIcon{vector-square}}{One detection, two views}{What places the marker also draws the box.}
+      \triaditem{\faIcon{lock}}{Nothing extra is exposed}{One stream at a time, on the one app port.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Feed any camera from a recording or a webcam}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.40\textwidth}
+      \vskip1mm
+      \triaditem{\faIcon{file-video}}{Recorded video}{mp4 files, looped as live streams.}
+      \triaditem{\faIcon{laptop}}{A webcam}{Shared from the browser, or attached to the machine.}
+      \triaditem{\faIcon{upload}}{Share recording}{Pick any video file; it is analysed on the spot.}
+    \end{column}
+    \begin{column}{0.56\textwidth}
+      \triadshot{share.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The alert names the person. Ask who it is.}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.38\textwidth}
+      \triadshot[0.94\linewidth]{who.jpg}
+    \end{column}
+    \begin{column}{0.58\textwidth}
+      \vskip1mm
+      \triaditem{\faIcon{id-badge}}{Who}{Name, role, shift, supervisor and training.}
+      \triaditem{\faIcon{stopwatch}}{When and how long}{Entered, alert raised, left, time in the zone.}
+      \triaditem{\faIcon{user-shield}}{Allowed or not}{Authorisation, and other incidents today.}
+      \vskip0.6ex
+      {\setlength{\baselineskip}{6.2mm}\triadchip[triadMuted]{SYNTHETIC EMPLOYEES}\hskip1.6mm\triadchip[triadMuted]{SIMULATED BADGE FEED}\hskip1.6mm\triadchip[triadMuted]{NO FACE RECOGNITION}\par}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{One more sentence writes the incident report}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.58\textwidth}
+      \triadquote[YOU ASK]{Write the incident report.}
+      \triaditem{\faIcon{clipboard-list}}{Complete}{What, where, when, who, severity, action.}
+      \triaditem{\faIcon{database}}{Grounded}{Filled from the stored event, nothing invented.}
+      \triaditem{\faIcon{image}}{Evidence attached}{The camera snapshot from that moment.}
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \hfill\triadshot[0.94\linewidth]{report.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ============================================================================
+\section{How it works}
+
+\begin{frame}{One device takes video to a spoken answer}
+  \centering
+  \begin{tikzpicture}[x=0.95mm,y=1mm]
+    % the device
+    \fill[triadWash,rounded corners=3mm] (11,-33) rectangle (106,14);
+    \draw[triadPrimary,line width=0.8pt,rounded corners=3mm] (11,-33) rectangle (106,14);
+    \node[anchor=north west,font=\scriptsize\bfseries,text=triadPrimary] at (13.5,12.6) {ONE NVIDIA JETSON THOR};
+    \node[anchor=north east,font=\scriptsize,text=triadMuted] at (103.5,12.6) {six streams, one batch};
+    % perception lane
+    \node[tnode sm, tfill soft] (cam) at (0,0) {\faIcon{video}\ \ Cameras};
+    \node[tnode sm] (ing) at (24,0) {Ingest};
+    \node[tnode sm] (det) at (46,0) {Detector};
+    \node[tnode sm] (trk) at (68,0) {Track + map};
+    \node[tnode sm] (rul) at (90,0) {Rules};
+    \node[tnode sm, tfill alt] (sto) at (90,-12) {Event store};
+    % voice lane
+    \node[tnode sm, tfill soft] (mic) at (0,-24) {\faIcon{microphone}\ \ Voice};
+    \node[tnode sm] (asr) at (24,-24) {Speech in};
+    \node[tnode sm, tfill accent, minimum width=38mm] (agt) at (57,-24) {Assistant + 7 tools};
+    \node[tnode sm] (tts) at (90,-24) {Speech out};
+    \node[tnode, tfill soft, minimum height=34mm, minimum width=22mm] (web) at (124,-12) {\faIcon{cube}\\[1mm]Browser\\twin};
+    \draw[tarrow] (cam)--(ing); \draw[tarrow] (ing)--(det); \draw[tarrow] (det)--(trk); \draw[tarrow] (trk)--(rul);
+    \draw[tarrow] (rul)--(sto);
+    \draw[tarrow] (mic)--(asr); \draw[tarrow] (asr)--(agt); \draw[tarrow] (agt)--(tts);
+    \draw[tarrow soft] (sto.west) -| (agt.north);
+    \node[tlabel, anchor=south] at (48,-12) {tools read events and live state};
+    \draw[tarrow] (rul.east) -- ++(9,0) |- ([yshift=7mm]web.west);
+    \draw[tarrow] (tts.east) -- ++(9,0) |- ([yshift=-7mm]web.west);
+    \node[tlabel, anchor=south] at ([yshift=0.6mm]web.north) {tracks, events};
+    \node[tlabel, anchor=north] at ([yshift=-0.6mm]web.south) {answer, speech};
+  \end{tikzpicture}
+  \vskip1.6ex
+  {\small\color{triadMuted}One vision-language model serves the conversation and the ``look at this frame'' tool.\par}
+\end{frame}
+
+\begin{frame}{The planned model stack fits inside 15 GB}
+  \centering
+  \begin{tikzpicture}[x=8.8mm,y=1mm]
+    % x is gigabytes
+    \fill[triadPrimary] (0,0) rectangle (6,13);
+    \fill[triadPrimary!72!triadPaper] (6.04,0) rectangle (7.5,13);
+    \fill[triadAccent] (7.54,0) rectangle (8.5,13);
+    \fill[triadAccent!60!triadPaper] (8.54,0) rectangle (8.8,13);
+    \fill[triadSecondary] (8.84,0) rectangle (10.8,13);
+    \fill[triadMuted!45!triadPaper] (10.84,0) rectangle (12.8,13);
+    \draw[triadMuted!70!triadPaper,dashed,line width=0.6pt] (12.84,0) rectangle (15,13);
+    \node[font=\large\bfseries,text=triadOnPrimary] at (3,6.5) {6 GB};
+    \node[font=\small\bfseries,text=triadOnPrimary] at (6.77,6.5) {1.5};
+    \node[font=\small\bfseries,text=triadOnAccent] at (8.02,6.5) {1};
+    \node[font=\small\bfseries,text=white] at (9.82,6.5) {2};
+    \node[font=\small\bfseries,text=triadInk] at (11.82,6.5) {2};
+    \node[font=\small,text=triadMuted] at (13.92,6.5) {2.2 free};
+    \node[tlabel, anchor=south, text=triadInk] at (3,14) {Vision-language model};
+    \node[tlabel, anchor=south, text=triadInk] at (6.77,14) {Speech in};
+    \node[tlabel, anchor=south, text=triadInk] at (8.02,19) {Detector};
+    \draw[triadMuted,line width=0.4pt] (8.02,13.4)--(8.02,18.6);
+    \node[tlabel, anchor=north, text=triadInk] at (8.67,-5) {Speech out, 0.3};
+    \draw[triadMuted,line width=0.4pt] (8.67,-0.4)--(8.67,-4.6);
+    \node[tlabel, anchor=south, text=triadInk] at (9.82,14) {App and buffers};
+    \node[tlabel, anchor=south, text=triadInk] at (11.82,14) {Headroom};
+    \node[tlabel, anchor=north] at (0,-1) {0};
+    \node[tlabel, anchor=north] at (15,-1) {15 GB};
+  \end{tikzpicture}
+  \vskip1.0ex
+  \raggedright
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.31\textwidth}
+      \triaditem{\faIcon{brain}}{Vision model}{3B, half precision.}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \triaditem{\faIcon{volume-up}}{Whisper and Piper}{Speech stays local.}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \triaditem{\faIcon{microchip}}{YOLO on TensorRT}{One batch, six streams.}
+    \end{column}
+  \end{columns}
+  {\scriptsize\color{triadMuted}Planned budget. It still has to be measured on the Jetson.\par}
+\end{frame}
+
+\begin{frame}{Every heavy component has a mock}
+  \swap{\faIcon{eye}}{Perception}{Video and detector}{Simulated people}\hfill
+  \swap{\faIcon{comment-dots}}{Assistant}{Vision model}{Keyword router}\hfill
+  \swap{\faIcon{microphone}}{Speech in}{Whisper}{A fixed question}\hfill
+  \swap{\faIcon{volume-up}}{Speech out}{Piper}{A chime}
+  \vskip2.6ex
+  {\large\bfseries A backend that fails to load \triadhl{falls back to its mock}, so the demo cannot die.\par}
+\end{frame}
+
+% ============================================================================
+\section{Status and demo}
+
+\begin{frame}{Proven on a laptop. The Jetson run is the next step.}
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[height=24mm]
+      {\color{triadPrimary}\fontsize{30}{30}\selectfont\bfseries 77\par}\vskip0.8ex
+      {\small\color{triadMuted}automated tests passing\par}
+    \end{triadcard}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[height=24mm]
+      {\color{triadAccent}\fontsize{30}{30}\selectfont\bfseries 6\par}\vskip0.8ex
+      {\small\color{triadMuted}camera streams at once, on a laptop CPU\par}
+    \end{triadcard}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[height=24mm]
+      {\color{triadMuted}\fontsize{30}{30}\selectfont\bfseries 0\par}\vskip0.8ex
+      {\small\color{triadMuted}runs on a Jetson so far\par}
+    \end{triadcard}
+  \end{minipage}
+  \vskip2.0ex
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \triadkicker{SHOWN WORKING}\vskip1.2ex
+      \tick{Twin, events, conversation, report}
+      \tick{Real detection and speech on CPU}
+      \tick{Webcam and shared recording}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \triadkicker{STILL TO PROVE ON THE JETSON}\vskip1.2ex
+      \todo{Hardware decode and TensorRT}
+      \todo{3B model picks tools, 13 of 15}
+      \todo{10 fps on 6 streams, 2.5 s voice}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The demo is seven steps}
+  \vskip5mm
+  \triadtimeline[\footnotesize]{{Twin loads, six streams live}, {``Status of both plants''}, {``Show me Plant 2, floor 3''}, {``Any safety issues?''}, Click the alert on Plant 1 F2, {``Who is this person?''}, {``Write the incident report''}}
+  \vfill
+  \begin{triadcard}[top=2.6mm,bottom=2.6mm]
+    {\bfseries\color{triadPrimary}Then\ \ }one unscripted question from a judge.
+  \end{triadcard}
+  \vskip2mm
+\end{frame}
+
+\begin{frame}{Why it matters}
+  \begin{minipage}[t]{0.49\textwidth}
+    \triadcardbox[equal height group=value,top=2.4mm,bottom=2.4mm]{\faIcon{shield-alt}}{Safety}{Events are seen, named and written up in the moment.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.49\textwidth}
+    \triadcardbox[equal height group=value,top=2.4mm,bottom=2.4mm]{\faIcon{route}}{Operations}{One person can ask about any floor without walking to it.}
+  \end{minipage}
+  \vskip1.8mm
+  \begin{minipage}[t]{0.49\textwidth}
+    \triadcardbox[equal height group=value,top=2.4mm,bottom=2.4mm]{\faIcon{lock}}{Privacy and cost}{Audio and video stay on one device. No cloud calls.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.49\textwidth}
+    \triadcardbox[equal height group=value,top=2.4mm,bottom=2.4mm]{\faIcon{file-code}}{Fit}{A new site is a new configuration file, not a new project.}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}[plain,noframenumbering]
+  \triadstatement[Talk-to-your-Company. Globant Physical AI Hackathon, built for one NVIDIA Jetson Thor.]
+    {Ask your company a question. It shows you, and it tells you.}
+\end{frame}
+
+\end{document}

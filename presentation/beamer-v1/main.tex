@@ -1,0 +1,361 @@
+% Talk-to-your-Company: presentation deck (Beamer).
+% Build:  latexmk -pdf main.tex   (two passes; the counter and progress bar need the .aux)
+% Theme:  Triad with the "nvglobant" palette defined in beamerthemeTriad.sty beside this file.
+\documentclass[aspectratio=169,11pt,t]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\IfFileExists{lmodern.sty}
+  {\usepackage{lmodern}\usepackage{microtype}}
+  {\usepackage{anyfontsize}\usepackage[expansion=false]{microtype}}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{amsmath,amssymb}
+
+\usetheme[palette=nvglobant,dark=true]{Triad}
+\usepackage{triadgraphics}
+
+% On this palette the fills are bright greens, so type on them is dark.
+\tikzset{
+  tnode/.append style={text=triadPaper},
+  % colour-only variants, so they can follow a size variant without resetting it
+  tsoft/.style={fill=triadWash, text=triadInk, draw=triadMuted!45, line width=0.5pt},
+  talt/.style={fill=triadSecondary, text=white},
+  tacc/.style={fill=triadAccent, text=triadPaper},
+}
+\setbeamercolor{block title alerted}{fg=triadPaper,bg=triadAccent}
+\setbeamercolor{block title example}{fg=white,bg=triadSecondary}
+\graphicspath{{../assets/}}
+
+% A screenshot with a hairline frame so its dark edge separates from the dark slide.
+\newcommand{\shot}[2][\linewidth]{%
+  {\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.4pt}%
+   \fcolorbox{triadMuted!55}{triadPaper}{\includegraphics[width=\dimexpr#1-0.8pt\relax]{#2}}}}
+\setbeamerfont{title}{size=\Huge,series=\bfseries}
+
+\title[Talk-to-your-Company]{Talk-to-your-Company}
+\subtitle{A live 3D twin of your plants that you can talk to, built for one NVIDIA Jetson Thor}
+\author[Yash Kavaiya]{Yash Kavaiya}
+\institute[Globant Physical AI Hackathon]{Globant Physical AI Hackathon}
+\date{October 2026}
+
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+
+% ============================================================================
+\section{The problem}
+
+\begin{frame}{Safety events go unseen because nobody can watch every camera}
+  \triadlead{A plant manager with several buildings and floors is always looking at the wrong screen.}
+  \begin{itemize}
+    \item Near-misses, people in restricted zones and missing helmets go unreported
+    \item A simple question, ``what is happening on floor 3?'', means walking there or calling someone
+    \item Camera walls show video; they do not answer questions
+    \item Sending factory video to a cloud is slow, costly and often not allowed
+  \end{itemize}
+  \triadtakeaway{The manager needs one view of the whole site, and a way to ask it things.}
+\end{frame}
+
+\begin{frame}[plain,noframenumbering]
+  \triadstatement[Ask by voice. The twin flies to the right floor, shows what the cameras see, and answers out loud.]
+    {A live 3D twin of your company that you can talk to.}
+\end{frame}
+
+% ============================================================================
+\section{What it does}
+
+\begin{frame}{Both plants and all six floors are live in one view}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.60\textwidth}
+      \shot{twin.jpg}
+    \end{column}
+    \begin{column}{0.36\textwidth}
+      \triadlead{Every person and vehicle the cameras see is a marker on the right floor.}
+      \begin{itemize}
+        \item 2 plants, 3 floors each, 6 cameras
+        \item Positions update 5 times a second
+        \item Pulsing red markers for safety events
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The whole site is generated from one configuration file}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.36\textwidth}
+      \triadlead{Select a plant and its floors spread apart to show what is inside.}
+      \begin{itemize}
+        \item Plants, floors, cameras and zones
+        \item Conveyors, racks, machines, pallets, offices
+        \item Change the file and the twin, the rules and the assistant all follow
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.60\textwidth}
+      \shot{plants.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{You ask in plain language, by voice or by text}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.60\textwidth}
+      \shot{ask.jpg}
+    \end{column}
+    \begin{column}{0.36\textwidth}
+      \triadlead{The answer is spoken, shown as text, and drives the twin.}
+      \begin{itemize}
+        \item ``Give me a status of both plants''
+        \item ``Show me Plant 2, floor 3'' moves the camera there
+        \item Out-of-scope questions get an honest ``I can't see that''
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Four rules turn tracks into safety events on the right floor}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.50\textwidth}
+      \small
+      \begin{tabular}{@{}p{24mm}p{43mm}@{}}
+        \toprule
+        \textbf{Event} & \textbf{Raised when} \\
+        \midrule
+        Near miss & a person is within 2 m of a closing forklift \\
+        Restricted zone & a person stays inside for over 2 s \\
+        No helmet & the vision check on a person says no \\
+        Crowding & more than 4 people are within 3 m \\
+        \bottomrule
+      \end{tabular}
+      \vskip1.2ex
+      Events are stored and can be asked about by plant, floor, type and time.
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \shot{safety.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Every floor has a live camera view with detections boxed}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.52\textwidth}
+      \shot[0.96\linewidth]{camera.jpg}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \triadlead{Focus a floor and its camera appears beside the twin.}
+      \begin{itemize}
+        \item The same detection that places the marker draws the box
+        \item One stream is shown at a time, so it stays light
+        \item Nothing is published beyond the one app port
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Any camera can be fed from a recording or a webcam}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.36\textwidth}
+      \triadlead{For a live demo, drop your own footage into a floor.}
+      \begin{itemize}
+        \item Recorded mp4 files, looped as live streams
+        \item A webcam shared from the browser, or attached to the machine
+        \item ``Share recording'': pick a video file and it is analysed on the spot
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.60\textwidth}
+      \shot{share.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The alert names the person, and one question gives the full picture}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.40\textwidth}
+      \shot[0.84\linewidth]{who.jpg}
+    \end{column}
+    \begin{column}{0.56\textwidth}
+      \triadlead{``Who is this person?''}
+      \begin{itemize}
+        \item Name, role, shift, supervisor and training
+        \item When they entered, when the alert fired, how long they stayed
+        \item Whether they were authorised for that zone
+        \item Where they are now, and their other incidents today
+      \end{itemize}
+      \vskip0.6ex
+      {\small\color{triadMuted}Employees are fictional. Identity comes from a simulated badge feed, not from face recognition.\par}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{One more sentence writes the incident report}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.56\textwidth}
+      \triadlead{``Write the incident report.''}
+      \begin{itemize}
+        \item What, where, when, who, severity and recommended action
+        \item Filled from the stored event, so it cannot contain invented facts
+        \item The camera snapshot from the moment of the alert is attached
+      \end{itemize}
+      \triadtakeaway{From alert to written report without leaving the twin.}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      \hfill\shot[0.84\linewidth]{report.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ============================================================================
+\section{How it works}
+
+\begin{frame}{One process on one device takes video to a spoken answer}
+  \centering
+  \begin{tikzpicture}[x=0.97mm,y=1mm]
+    % perception lane
+    \node[tlabel, anchor=west] at (-9,8) {PERCEPTION, 6 STREAMS};
+    \node[tnode sm, tsoft] (cam) at (0,0) {Cameras};
+    \node[tnode sm] (ing) at (24,0) {Ingest};
+    \node[tnode sm] (det) at (48,0) {Detector};
+    \node[tnode sm] (trk) at (72,0) {Track + map};
+    \node[tnode sm] (rul) at (96,0) {Rules};
+    \node[tnode sm, talt] (sto) at (120,0) {Event store};
+    % voice lane
+    \node[tlabel, anchor=west] at (-9,-14) {VOICE};
+    \node[tnode sm, tsoft] (mic) at (0,-22) {Mic};
+    \node[tnode sm] (asr) at (24,-22) {Speech in};
+    \node[tnode sm, tacc] (agt) at (48,-22) {Agent + tools};
+    \node[tnode sm] (tts) at (72,-22) {Speech out};
+    \node[tnode sm, tsoft] (web) at (120,-22) {Browser twin};
+    \draw[tarrow] (cam)--(ing); \draw[tarrow] (ing)--(det); \draw[tarrow] (det)--(trk);
+    \draw[tarrow] (trk)--(rul); \draw[tarrow] (rul)--(sto);
+    \draw[tarrow] (mic)--(asr); \draw[tarrow] (asr)--(agt); \draw[tarrow] (agt)--(tts);
+    \draw[tarrow] (tts)--(web) node[tlabel, midway, below]{answer and speech};
+    \draw[tarrow] (sto)--(web) node[tlabel, midway, right]{state, events};
+    \draw[tarrow soft] (sto.south west) to[out=215,in=20] (agt.north east);
+    \node[tlabel] at (64,-7) {tools read events and live state};
+  \end{tikzpicture}
+  \vskip2.4ex
+  \raggedright
+  \begin{itemize}
+    \item One vision-language model serves the conversation and the ``look at this frame'' tool
+    \item Seven tools: events, live state, look, focus, show event, identify person, write report
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The planned model stack leaves headroom inside 15 GB}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.60\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[triad hbars, width=58mm, height=0.58\textheight,
+          symbolic y coords={Headroom,App and buffers,Speech synthesis,Detector,Speech recognition,Vision-language model},
+          ytick=data, xlabel={Memory budget (GB)}, xmin=0, xmax=8]
+          \addplot[triad fill a] coordinates
+            {(2,Headroom)(2,App and buffers)(0.3,Speech synthesis)(1,Detector)(1.5,Speech recognition)(6,Vision-language model)};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.36\textwidth}
+      \triadlead{12.8 of 15 GB budgeted.}
+      \begin{itemize}
+        \item 3B-class vision-language model, half precision
+        \item Whisper for speech in, Piper for speech out
+        \item YOLO exported to TensorRT, one batch for all streams
+      \end{itemize}
+      \vskip0.6ex
+      {\small\color{triadMuted}This is the plan. The figures still have to be measured on the Jetson.\par}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Every heavy component has a mock, so the demo cannot die}
+  \centering
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Component} & \textbf{Real} & \textbf{Mock} \\
+    \midrule
+    Perception & video, detector, tracker & simulated people, scripted scenarios \\
+    Assistant & vision-language model & keyword router calling the same tools \\
+    Speech in & Whisper & fixed question \\
+    Speech out & Piper & chime \\
+    \bottomrule
+  \end{tabular}
+  \vskip2ex
+  \raggedright
+  \begin{itemize}
+    \item A backend that fails to load falls back to its mock at startup, and the app says which is running
+    \item The whole app runs on a laptop without a GPU, which is how it was built and tested
+  \end{itemize}
+  \triadtakeaway{If a model fails on stage, the twin and the conversation keep working.}
+\end{frame}
+
+% ============================================================================
+\section{Status and demo}
+
+\begin{frame}{The software is proven on a laptop; the Jetson run is the next step}
+  \triadmetricrow
+    {\triadmetric{77}{automated tests passing}}
+    {\triadmetric[triadPrimary]{6}{camera streams detected together on a laptop CPU}}
+    {\triadmetric[triadMuted]{0}{runs on a Jetson so far}}
+  \vskip0.9em
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \textbf{Shown working}
+      \begin{itemize}
+        \item Twin, events, conversation, report
+        \item Real detection, speech in and speech out on CPU
+        \item Webcam and shared recording
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Still to prove on the Jetson}
+      \begin{itemize}
+        \item Hardware video decode and TensorRT
+        \item 3B model picks tools, 13 of 15
+        \item 10 fps on 6 streams, voice under 2.5 s
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The demo is seven steps, from overview to incident report}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \begin{enumerate}
+        \item Twin loads: six streams live, metrics visible
+        \item ``Give me a status of both plants''
+        \item ``Show me Plant 2, floor 3''
+        \item ``Any safety issues in the last ten minutes?''
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{enumerate}
+        \setcounter{enumi}{4}
+        \item Click the restricted-zone alert on Plant 1, floor 2
+        \item ``Who is this person?''
+        \item ``Write the incident report''
+      \end{enumerate}
+    \end{column}
+  \end{columns}
+  \triadtakeaway{Then one unscripted question from a judge.}
+\end{frame}
+
+\begin{frame}{Why it matters: answers at the speed of a question, with data that stays on site}
+  \triadlead{The value is the time between something happening and someone knowing.}
+  \begin{itemize}
+    \item \textbf{Safety:} events are seen, named and written up in the moment, not at the end of a shift
+    \item \textbf{Operations:} one person can ask about any floor without walking to it
+    \item \textbf{Privacy and cost:} audio and video are processed on one device, with no cloud calls at runtime
+    \item \textbf{Fit:} a new site is a new configuration file, not a new project
+  \end{itemize}
+  \triadtakeaway{Built to run on a single NVIDIA Jetson Thor, so it can sit inside the plant.}
+\end{frame}
+
+\begin{frame}[plain,noframenumbering]
+  \triadstatement[Talk-to-your-Company. Globant Physical AI Hackathon, on NVIDIA Jetson Thor.]
+    {Ask your company a question. It shows you, and it tells you.}
+\end{frame}
+
+\end{document}

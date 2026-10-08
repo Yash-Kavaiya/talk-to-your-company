@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Talk-to-your-Company</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports": {"three": "./vendor/three/three.module.js"}}</script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <nav id="nav">
+    <h1>Talk-to-your-Company <span id="link" class="dot" title="connecting"></span></h1>
+    <div id="nav-items"></div>
+  </nav>
+
+  <section id="hud" aria-label="Edge metrics">
+    <h2>Running on this device</h2>
+    <div id="hud-fps" class="fps"></div>
+    <dl>
+      <dt>Voice latency</dt><dd id="hud-latency">–</dd>
+      <dt>GPU</dt><dd id="hud-gpu">–</dd>
+      <dt>Memory</dt><dd id="hud-mem">–</dd>
+    </dl>
+    <p class="private">No audio or video leaves this device.</p>
+  </section>
+
+  <aside id="panel" hidden>
+    <button id="panel-close" aria-label="Close panel">×</button>
+    <div id="panel-body"></div>
+  </aside>
+
+  <figure id="camera" hidden>
+    <figcaption>
+      <span class="live">LIVE</span> <span id="camera-title"></span>
+      <span class="share">
+        <button type="button" id="camera-share">Share webcam</button>
+        <button type="button" id="camera-record">Share recording</button>
+        <button type="button" id="camera-stop" hidden>Stop sharing</button>
+      </span>
+      <input type="file" id="camera-file" accept="video/*" hidden>
+    </figcaption>
+    <img id="camera-image" alt="Live camera view of the selected floor">
+  </figure>
+
+  <section id="voice">
+    <p id="transcript" class="line"></p>
+    <p id="answer" class="line"></p>
+    <canvas id="wave" aria-hidden="true"></canvas>
+    <form id="ask">
+      <button type="button" id="talk" title="Hold to talk (or hold the space bar)">
+        <span id="orb"></span><span id="talk-label">Hold to talk</span>
+      </button>
+      <input id="text" type="text" autocomplete="off" maxlength="500"
+             placeholder="or type a question, e.g. show me plant 2 floor 3">
+      <button type="submit">Ask</button>
+    </form>
+  </section>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
