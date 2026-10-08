@@ -1,0 +1,239 @@
+% Section "Architecture in detail": the technical deep dive. \input from main.tex.
+% Same facts as docs/architecture.md; change both together.
+\section{Architecture in detail}
+\renewcommand{\arraystretch}{1.3}
+
+\begin{frame}{One process runs three loops at once}
+  \begin{minipage}[t]{0.32\textwidth}
+    \triadcardbox[equal height group=loops]{\faIcon{video}}{Perception threads}{One thread per stream decodes video. One batched detector, then tracker and mapper.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \triadcardbox[equal height group=loops]{\faIcon{broadcast-tower}}{Broadcast loop, 5 Hz}{Runs the rules on the latest tracks, stores events, sends state to the browser.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \triadcardbox[equal height group=loops]{\faIcon{comments}}{Agent loop, per question}{Speech to text, up to three rounds of tool calls, then the spoken answer.}
+  \end{minipage}
+  \vskip2.4ex
+  {\bfseries One FastAPI process on \triadhl{0.0.0.0:8000}. The browser is the only client; that is the only port.\par}
+\end{frame}
+
+\begin{frame}{Perception: five stages from pixels to floor metres}
+  \footnotesize
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.12\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.66\textwidth}@{}}
+    {\scriptsize\bfseries\color{triadPrimary}STAGE} & {\scriptsize\bfseries\color{triadPrimary}MODULE} & {\scriptsize\bfseries\color{triadPrimary}WHAT IT DOES}\\[1.0ex]
+    \textbf{Ingest} & \texttt{ingest.py} & \textcolor{triadMuted}{GStreamer hardware decode, OpenCV fallback. Files, a webcam or shared frames.}\\[0.7ex]
+    \textbf{Detect} & \texttt{detector.py} & \textcolor{triadMuted}{YOLO on TensorRT FP16. Every stream's latest frame in one batch.}\\[0.7ex]
+    \textbf{Track} & \texttt{tracker.py} & \textcolor{triadMuted}{ByteTrack-style association per stream. Gives each person a stable id.}\\[0.7ex]
+    \textbf{Map} & \texttt{mapper.py} & \textcolor{triadMuted}{Foot point through the camera homography to floor metres.}\\[0.7ex]
+    \textbf{Mock} & \texttt{mock.py} & \textcolor{triadMuted}{Simulated people; a scripted scenario every 30 s raises a real event.}\\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Rules are pure functions with fixed thresholds}
+  \footnotesize
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.42\textwidth}>{\raggedright\arraybackslash}p{0.32\textwidth}@{}}
+    {\scriptsize\bfseries\color{triadPrimary}EVENT} & {\scriptsize\bfseries\color{triadPrimary}RAISED WHEN} & {\scriptsize\bfseries\color{triadPrimary}NOTES}\\[1.0ex]
+    \texttt{near\_miss} & Person and forklift within 2 m, closing above 0.5 m/s. & \textcolor{triadMuted}{Severity 3.}\\[0.7ex]
+    \texttt{restricted\_zone} & Person inside a restricted polygon for over 2 s. & \textcolor{triadMuted}{Once per stay; authorised people exempt.}\\[0.7ex]
+    \texttt{no\_helmet} & The vision model says no about a person crop. & \textcolor{triadMuted}{One unchecked person every 3 s.}\\[0.7ex]
+    \texttt{crowding} & More than 4 people within a 3 m radius. & \textcolor{triadMuted}{Severity 1.}\\
+  \end{tabular}
+  \vskip1.6ex
+  {\bfseries Unit-tested, debounced for \triadhl{30 seconds}, and the same on mock and real tracks.\par}
+\end{frame}
+
+\begin{frame}{Tracks live in memory. Events live in SQLite.}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.38\textwidth}
+      \begin{triadcard}[equal height group=data]
+        \triadkicker{TRACK, IN MEMORY}\vskip1.2ex
+        {\small\ttfamily id, zone, cls\par x, y, vx, vy\par bbox, last\_seen\par}\vskip1.4ex
+        {\footnotesize\color{triadMuted}Positions in floor metres, sent five times a second.\par}
+      \end{triadcard}
+    \end{column}
+    \begin{column}{0.58\textwidth}
+      \begin{triadcard}[equal height group=data]
+        \triadkicker{EVENT, ONE ROW IN SQLITE}\vskip1.2ex
+        {\small\ttfamily id, ts, plant, floor, camera\_id\par type, severity, track\_ids\par x, y, snapshot\_path, summary, person\_id\par}\vskip1.4ex
+        {\footnotesize\color{triadMuted}Queried by plant, floor, type and time. Open for ten minutes.\par}
+      \end{triadcard}
+    \end{column}
+  \end{columns}
+  \vskip1.8ex
+  {\bfseries The report is \triadhl{filled from the event row}, so it cannot contain invented facts.\par}
+\end{frame}
+
+\begin{frame}{One WebSocket carries eleven message types}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.56\textwidth}
+      \triadkicker{SERVER TO BROWSER}\vskip0.6ex
+      \footnotesize
+      \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.27\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}@{}}
+        \texttt{site} & \textcolor{triadMuted}{the whole site, on connect}\\
+        \texttt{state} & \textcolor{triadMuted}{every track per floor, 5 Hz}\\
+        \texttt{event} & \textcolor{triadMuted}{one event row, when a rule fires}\\
+        \texttt{ui} & \textcolor{triadMuted}{focus, highlight or open a panel}\\
+        \texttt{transcript} & \textcolor{triadMuted}{what was heard or typed}\\
+        \texttt{answer} & \textcolor{triadMuted}{one sentence per message}\\
+        \texttt{audio} & \textcolor{triadMuted}{that sentence, spoken}\\
+        \texttt{metrics} & \textcolor{triadMuted}{fps, latency, GPU, memory, 1 Hz}\\
+      \end{tabular}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      \triadkicker{BROWSER TO SERVER}\vskip0.6ex
+      \footnotesize
+      \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.44\linewidth}>{\raggedright\arraybackslash}p{0.52\linewidth}@{}}
+        \texttt{audio\_query} & \textcolor{triadMuted}{16 kHz WAV}\\
+        \texttt{text\_query} & \textcolor{triadMuted}{typed question}\\
+        \texttt{select\_event} & \textcolor{triadMuted}{marker click}\\
+      \end{tabular}
+      \vskip1.4ex
+      \triadkicker{PLAIN HTTP}\vskip0.8ex
+      {\footnotesize\ttfamily /api/health\par /api/camera/\{plant\}/\{floor\}\par}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The assistant must call a tool before it states a fact}
+  \vskip3mm
+  \triadtimeline[\scriptsize]{{Question, spoken or typed}, {Model sees the tool schemas}, {Tool runs, twin reacts}, {Up to three rounds}, {Final answer, two sentences}, {Spoken, sentence by sentence}}
+  \vskip3.0ex
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.31\textwidth}
+      \triaditem{\faIcon{code}}{JSON tool calls}{Parsed by the app, so any model can be used.}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \triaditem{\faIcon{history}}{Short memory}{Last six turns, current view, last event.}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \triaditem{\faIcon{eye-slash}}{Honest}{``I can't see that'' when tools return nothing.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Seven tools connect the model to the site}
+  \footnotesize
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.32\textwidth}@{}}
+    {\scriptsize\bfseries\color{triadPrimary}TOOL} & {\scriptsize\bfseries\color{triadPrimary}RETURNS} & {\scriptsize\bfseries\color{triadPrimary}EFFECT ON THE TWIN}\\[0.9ex]
+    \texttt{query\_events} & Events by plant, floor, type and time. & \textcolor{triadMuted}{Highlights their markers.}\\[0.45ex]
+    \texttt{live\_state} & People, vehicles and open events now. & \textcolor{triadMuted}{None.}\\[0.45ex]
+    \texttt{look} & The vision model's answer on the frame. & \textcolor{triadMuted}{Focuses that floor.}\\[0.45ex]
+    \texttt{focus\_view} & Nothing. & \textcolor{triadMuted}{Flies the camera there.}\\[0.45ex]
+    \texttt{show\_event} & Nothing. & \textcolor{triadMuted}{Opens the event panel.}\\[0.45ex]
+    \texttt{identify\_person} & Employee, visit timing, incidents. & \textcolor{triadMuted}{Opens the person panel.}\\[0.45ex]
+    \texttt{write\_report} & What, where, when, who, severity, action. & \textcolor{triadMuted}{Opens the report panel.}\\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Voice: 2.5 seconds to the first spoken word}
+  \vskip3mm
+  \triadtimeline[\scriptsize]{{Hold to talk}, {16 kHz WAV over the socket}, {Whisper transcribes}, {Agent answers}, {Piper speaks each sentence}, {Queued playback}}
+  \vskip1.6ex
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[height=20mm]
+      {\color{triadPrimary}\fontsize{22}{22}\selectfont\bfseries 2.5 s\par}\vskip0.8ex
+      {\footnotesize\color{triadMuted}target, release to first audio\par}
+    \end{triadcard}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[height=20mm]
+      {\color{triadAccent}\fontsize{22}{22}\selectfont\bfseries 3.8 s\par}\vskip0.8ex
+      {\footnotesize\color{triadMuted}laptop CPU, mock assistant\par}
+    \end{triadcard}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[height=20mm]
+      {\color{triadMuted}\fontsize{22}{22}\selectfont\bfseries 5 s\par}\vskip0.8ex
+      {\footnotesize\color{triadMuted}hard limit; Jetson not measured\par}
+    \end{triadcard}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Identity comes from a badge feed, never from a face}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \vskip1mm
+      \triaditem{\faIcon{address-book}}{Synthetic directory}{Fictional employees and their zones.}
+      \triaditem{\faIcon{id-badge}}{Simulated badge feed}{Gives each tracked person a badge.}
+      \triaditem{\faIcon{plug}}{One class to replace}{A real system plugs in at \texttt{BadgeFeed}.}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \vskip1mm
+      \triaditem{\faIcon{user-check}}{Authorised means silent}{Allowed in the zone: no event.}
+      \triaditem{\faIcon{stopwatch}}{Visit timing}{Entered, alerted, left, how long.}
+      \triaditem{\faIcon{user-secret}}{Prompt rule}{No naming from appearance.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The frontend is plain ES modules and Three.js}
+  \footnotesize
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}p{0.68\textwidth}@{}}
+    {\scriptsize\bfseries\color{triadPrimary}MODULE} & {\scriptsize\bfseries\color{triadPrimary}ROLE}\\[0.9ex]
+    \texttt{twin.js, fixtures.js} & \textcolor{triadMuted}{Plants, floors, equipment and zones from the site message.}\\[0.45ex]
+    \texttt{tracks.js} & \textcolor{triadMuted}{Instanced markers, interpolated between state messages.}\\[0.45ex]
+    \texttt{events.js} & \textcolor{triadMuted}{Pulsing event markers, click picking, the side panel.}\\[0.45ex]
+    \texttt{camera.js} & \textcolor{triadMuted}{Camera view of the focused floor; share a webcam or recording.}\\[0.45ex]
+    \texttt{voice.js, wave.js} & \textcolor{triadMuted}{Push-to-talk, queued playback, the waveform.}\\[0.45ex]
+    \texttt{hud.js} & \textcolor{triadMuted}{Per-stream fps, latency, GPU, memory, the privacy line.}\\[0.45ex]
+    \texttt{scene.js, ws.js} & \textcolor{triadMuted}{Renderer and camera tweens; the one WebSocket.}\\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Three scripts take a bare Jetson to a running demo}
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[equal height group=deploy]
+      \triadbadge{1}\par\vskip1.2ex
+      {\bfseries\ttfamily setup\_jetson.sh\par}\vskip0.5ex
+      {\footnotesize\color{triadMuted}Once. Packages, models, TensorRT export, videos.\par}
+    \end{triadcard}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[equal height group=deploy]
+      \triadbadge{2}\par\vskip1.2ex
+      {\bfseries\ttfamily preflight.sh\par}\vskip0.5ex
+      {\footnotesize\color{triadMuted}Every start. CUDA, decoder, disk, port, models, videos.\par}
+    \end{triadcard}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.32\textwidth}
+    \begin{triadcard}[equal height group=deploy]
+      \triadbadge{3}\par\vskip1.2ex
+      {\bfseries\ttfamily run.sh\par}\vskip0.5ex
+      {\footnotesize\color{triadMuted}Every start. All backends real, offline, port 8000.\par}
+    \end{triadcard}
+  \end{minipage}
+  \vskip2.0ex
+  {\setlength{\baselineskip}{6.4mm}\triadchip[triadMuted]{NO SUDO, APT OR DOCKER}\hskip1.6mm\triadchip[triadMuted]{TORCH NEVER TOUCHED}\hskip1.6mm\triadchip[triadMuted]{8 CORES, 15 GB}\par}
+  \vskip1.0ex
+  {\footnotesize\color{triadMuted}Written and reviewed. Not yet run on the device.\par}
+\end{frame}
+
+\begin{frame}{Built spec first, and tested without a GPU}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \triadkicker{HOW THE WORK IS ORGANISED}\vskip1.2ex
+      \triaditem{\faIcon{file-alt}}{spec.md says what}{User stories with acceptance criteria.}
+      \triaditem{\faIcon{drafting-compass}}{plan.md says how}{Modules, protocol, memory budget.}
+      \triaditem{\faIcon{tasks}}{tasks.md says in what order}{One task at a time.}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \triadkicker{HOW IT IS CHECKED}\vskip1.2ex
+      \triaditem{\faIcon{vial}}{77 automated tests}{Mock mode only, no GPU needed.}
+      \triaditem{\faIcon{bullseye}}{Tool-calling test set}{15 questions; 13 must pass.}
+      \triaditem{\faIcon{redo}}{Golden path}{Three clean runs on the Jetson.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Known risks, and what is already in place for each}
+  \footnotesize
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.38\textwidth}>{\raggedright\arraybackslash}p{0.56\textwidth}@{}}
+    {\scriptsize\bfseries\color{triadPrimary}RISK} & {\scriptsize\bfseries\color{triadPrimary}MITIGATION}\\[1.0ex]
+    The shared GPU slows everything. & \textcolor{triadMuted}{Detector at 10 fps, models pre-warmed, a backup video.}\\[0.7ex]
+    A dependency replaces torch. & \textcolor{triadMuted}{Every install is dry-run checked first.}\\[0.7ex]
+    A small model is weak at tool calling. & \textcolor{triadMuted}{JSON-constrained calls; keyword router as fallback.}\\[0.7ex]
+    The microphone is blocked in the browser. & \textcolor{triadMuted}{The text box does the same thing.}\\[0.7ex]
+    A model fails to load on stage. & \textcolor{triadMuted}{That backend starts as its mock.}\\
+  \end{tabular}
+\end{frame}
+\renewcommand{\arraystretch}{1.0}

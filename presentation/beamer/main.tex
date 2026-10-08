@@ -7,6 +7,7 @@
 \IfFileExists{lmodern.sty}
   {\usepackage{lmodern}\usepackage{microtype}}
   {\usepackage{anyfontsize}\usepackage[expansion=false]{microtype}}
+\usepackage{array}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{tikz}
@@ -277,6 +278,9 @@
   \vskip2.6ex
   {\large\bfseries A backend that fails to load \triadhl{falls back to its mock}, so the demo cannot die.\par}
 \end{frame}
+
+% ============================================================================
+\input{architecture.tex}
 
 % ============================================================================
 \section{Status and demo}

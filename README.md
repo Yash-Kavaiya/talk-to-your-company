@@ -8,6 +8,9 @@ No audio or video leaves the device.
 Specs: [`specs/spec.md`](specs/spec.md) (what), [`specs/plan.md`](specs/plan.md) (how),
 [`specs/tasks.md`](specs/tasks.md) (order and status).
 
+Technical architecture in detail: [`docs/architecture.md`](docs/architecture.md). Slides: [`presentation/talk-to-your-company.pdf`](presentation/talk-to-your-company.pdf)
+(Beamer) and [`presentation/talk-to-your-company.pptx`](presentation/talk-to-your-company.pptx). Demo video project: [`videos/full-demo`](videos/full-demo).
+
 ## Architecture
 
 ```

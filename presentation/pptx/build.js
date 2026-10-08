@@ -296,8 +296,12 @@ divider(3, "How it works");
     "The whole app runs on a laptop without a GPU, which is how it was built and tested"], M, TOP + 3.0, W - 2 * M, 1.4);
 }
 
-// ============================================================ 4 status and demo
-divider(4, "Status and demo");
+// ============================================================ 4 architecture in detail
+divider(4, "Architecture in detail");
+require("./architecture.js")({ pres, content, lead, bullets, chip, colors: { INK, SOFT, BLACK, GREEN, LIME, MUTED, CARD }, THEME, W, M, TOP });
+
+// ============================================================ 5 status and demo
+divider(5, "Status and demo");
 {
   const s = content("The software is proven on a laptop; the Jetson run is the next step",
     "Be direct about this: nothing has run on a Jetson yet. The code paths for the real models have run on CPU with small stand-in models.");
